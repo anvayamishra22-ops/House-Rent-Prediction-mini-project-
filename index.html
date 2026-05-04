@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RentIQ - House Rent Prediction</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- PapaParse -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-background">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <main class="container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo">
+                <i class="ph-fill ph-house-line"></i>
+                <span>RentIQ</span>
+            </div>
+            <p class="subtitle">AI-Powered Rental Price Estimator</p>
+        </header>
+
+        <div class="dashboard">
+            <!-- Left Column: Form -->
+            <section class="form-section card glass">
+                <h2><i class="ph ph-list-magnifying-glass"></i> Property Details</h2>
+                <form id="prediction-form">
+                    
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label for="city">City</label>
+                            <div class="input-wrapper">
+                                <i class="ph ph-buildings"></i>
+                                <select id="city" name="city" required>
+                                    <option value="" disabled selected>Select a city...</option>
+                                    <option value="mumbai">Mumbai</option>
+                                    <option value="bangalore">Bangalore</option>
+                                    <option value="delhi">Delhi</option>
+                                    <option value="hyderabad">Hyderabad</option>
+                                    <option value="chennai">Chennai</option>
+                                    <option value="kolkata">Kolkata</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="area">Location / Area</label>
+                            <div class="input-wrapper">
+                                <i class="ph ph-map-pin"></i>
+                                <select id="area" name="area" required disabled>
+                                    <option value="" disabled selected>Select city first...</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label for="size">Size (Sq Ft)</label>
+                            <div class="input-wrapper">
+                                <i class="ph ph-ruler"></i>
+                                <input type="number" id="size" name="size" placeholder="e.g. 1000" min="100" max="10000" required>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="bhk">BHK</label>
+                            <div class="input-wrapper">
+                                <i class="ph ph-bed"></i>
+                                <select id="bhk" name="bhk" required>
+                                    <option value="" disabled selected>Select...</option>
+                                    <option value="1">1 BHK</option>
+                                    <option value="2">2 BHK</option>
+                                    <option value="3">3 BHK</option>
+                                    <option value="4">4 BHK+</option>
+                                    <option value="0">Studio</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label for="bathrooms">Bathrooms</label>
+                            <div class="input-wrapper">
+                                <i class="ph ph-bathtub"></i>
+                                <select id="bathrooms" name="bathrooms" required>
+                                    <option value="" disabled selected>Select...</option>
+                                    <option value="1">1 Bath</option>
+                                    <option value="2">2 Baths</option>
+                                    <option value="3">3 Baths</option>
+                                    <option value="4">4+ Baths</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="furnishing">Furnishing</label>
+                            <div class="input-wrapper">
+                                <i class="ph ph-armchair"></i>
+                                <select id="furnishing" name="furnishing" required>
+                                    <option value="" disabled selected>Select...</option>
+                                    <option value="unfurnished">Unfurnished</option>
+                                    <option value="semi">Semi-Furnished</option>
+                                    <option value="fully">Fully Furnished</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary" id="predict-btn">
+                        <span>Predict Rent</span>
+                        <i class="ph-bold ph-arrow-right"></i>
+                    </button>
+                </form>
+            </section>
+
+            <!-- Right Column: Results & Insights -->
+            <section class="results-section">
+                <!-- Result Card -->
+                <div class="result-card glass card" id="result-container">
+                    <div class="result-placeholder" id="result-placeholder">
+                        <div class="icon-circle">
+                            <i class="ph ph-magic-wand"></i>
+                        </div>
+                        <h3>Ready to Estimate</h3>
+                        <p>Fill in the property details to get a data-driven rental estimate.</p>
+                    </div>
+
+                    <div class="result-content hidden" id="result-content">
+                        <span class="badge">Estimated Fair Value</span>
+                        <h2 class="price-display">
+                            <span class="currency">₹</span>
+                            <span id="predicted-price">0</span>
+                            <span class="period">/ month</span>
+                        </h2>
+                        
+                        <div class="price-range">
+                            <p>Expected Range: <strong id="price-range">₹0 - ₹0</strong></p>
+                        </div>
+                        
+                        <div class="confidence-indicator">
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" style="width: 88%;"></div>
+                            </div>
+                            <span class="confidence-text">High Confidence</span>
+                        </div>
+                        
+                        <div class="result-details">
+                            <p><i class="ph-fill ph-info"></i> Estimate based on current market trends in <span id="res-location" style="font-weight:600;">your area</span>.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Insights Chart -->
+                <div class="insights-card glass card">
+                    <h3><i class="ph ph-trend-up"></i> Market Insights</h3>
+                    <div class="chart-container">
+                        <canvas id="marketChart"></canvas>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

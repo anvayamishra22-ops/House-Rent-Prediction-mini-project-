@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: rentiq-house-predictor
+    env: static
+    buildCommand: ""
+    staticPublishPath: .
