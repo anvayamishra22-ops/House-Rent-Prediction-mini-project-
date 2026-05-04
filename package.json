@@ -1,0 +1,8 @@
+{
+  "name": "house-rent-predictor",
+  "version": "1.0.0",
+  "description": "Static site served via Node for Render Web Service",
+  "scripts": {
+    "start": "npx serve -l $PORT ."
+  }
+}
