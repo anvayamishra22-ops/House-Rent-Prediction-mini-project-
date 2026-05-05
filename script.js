@@ -83,59 +83,38 @@ document.addEventListener('DOMContentLoaded', () => {
         resultContent.classList.add('hidden');
         resultPlaceholder.classList.remove('hidden');
 
-        // Simulate API call and ML prediction (Wait for 1.5s)
-        setTimeout(() => {
-            const prediction = calculateMockPrediction(formData);
-            
-            // 3. Update UI
-            updateResultsUI(formData, prediction);
-            updateChart(formData.city, prediction.exact);
-
+        // Make API call to our new Flask backend
+        fetch('http://127.0.0.1:5000/predict', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(prediction => {
+            if (prediction.error) {
+                console.error('Error from server:', prediction.error);
+                alert('An error occurred during prediction: ' + prediction.error);
+            } else {
+                // 3. Update UI
+                updateResultsUI(formData, prediction);
+                updateChart(formData.city, prediction.exact);
+            }
+        })
+        .catch(err => {
+            console.error('Fetch error:', err);
+            alert('Could not connect to the backend server. Is it running?');
+        })
+        .finally(() => {
             // Reset Button
             predictBtn.classList.remove('loading');
             btnIcon.classList.remove('ph-spinner');
             btnIcon.classList.add('ph-arrow-right');
-            
-        }, 1500);
+        });
     });
 
-    function calculateMockPrediction(data) {
-        // Base rate per sq ft depending on city
-        const cityRates = {
-            mumbai: 82,
-            bangalore: 22,
-            delhi: 68,
-            hyderabad: 24,
-            chennai: 20,
-            kolkata: 16
-        };
 
-        let baseRate = cityRates[data.city] || 30;
-        
-        // Adjust for BHK (Larger BHKs slightly reduce per sq.ft rate but increase total obviously)
-        let total = data.size * baseRate;
-
-        // Furnishing Multiplier
-        let furnishingMultipliers = {
-            unfurnished: 1.0,
-            semi: 1.15,
-            fully: 1.35
-        };
-        total *= (furnishingMultipliers[data.furnishing] || 1.0);
-
-        // Add premium for extra bathrooms (e.g. ₹2000 per extra bathroom)
-        if (data.bathrooms > 1) {
-            total += (data.bathrooms - 1) * 2000;
-        }
-
-        // Random variance to make it look "AI" calculated
-        const variance = total * 0.05; // 5% variance
-        const minBound = Math.round(total - variance);
-        const maxBound = Math.round(total + variance);
-        const exact = Math.round(total);
-
-        return { exact, minBound, maxBound };
-    }
 
     function updateResultsUI(data, prediction) {
         // Swap visibility
