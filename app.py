@@ -1,10 +1,15 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import pickle
 import pandas as pd
+import os
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='.', static_url_path='')
 CORS(app)  # Enable CORS for all routes so the frontend can make requests
+
+@app.route('/')
+def index():
+    return send_from_directory('.', 'index.html')
 
 # Load the trained model pipeline
 try:

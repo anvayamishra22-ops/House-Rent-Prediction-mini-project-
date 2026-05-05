@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
         resultPlaceholder.classList.remove('hidden');
 
         // Make API call to our new Flask backend
-        fetch('http://127.0.0.1:5000/predict', {
+        fetch('/predict', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
